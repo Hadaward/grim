@@ -2,7 +2,7 @@
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="70" height="40" tilewidth="12" tileheight="12" infinite="0" nextlayerid="28" nextobjectid="1">
  <tileset firstgid="1" source="../tilesets/RPG Tileset.tsx"/>
  <tileset firstgid="1025" source="../tilesets/Collision.tsx"/>
- <group id="27" name="Objetos">
+ <group id="27" name="Objetos" visible="0" offsetx="-1.25" offsety="0">
   <layer id="1" name="Water" width="70" height="40">
    <data encoding="csv">
 439,439,441,472,503,472,504,441,439,472,439,503,505,503,473,472,439,504,471,441,439,440,439,440,503,472,504,505,471,439,504,503,439,503,505,472,439,473,505,441,504,439,440,471,504,471,472,505,440,472,473,505,472,472,472,440,439,472,503,473,471,503,439,505,472,503,472,471,439,441,
@@ -444,7 +444,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="25" name="Foreground Objects" width="70" height="40" visible="0">
+ <layer id="25" name="Foreground Objects" width="70" height="40">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
