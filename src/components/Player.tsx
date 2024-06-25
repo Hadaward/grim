@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import SpriteSheet from "./SpriteSheet";
 import { useKeyboardInput } from "./util/hooks/keyboardInput";
 import { useAnimationFrame } from "./util/hooks/requestAnimationFrame";
@@ -9,76 +9,108 @@ import charLeft from "@/assets/char/left.png";
 import charRight from "@/assets/char/right.png";
 
 export type PlayerProps = {
-    onPlayerMove?: (x: number, y: number) => void,
     worldWidth: number,
-    worldHeight: number
+    worldHeight: number,
+    /**
+     * @default 0.3
+     */
+    friction?: number,
+    /**
+     * @default 5
+     */
+    maxSpeed?: number,
+    setPositionX: Dispatch<SetStateAction<number>>,
+    setPositionY: Dispatch<SetStateAction<number>>,
+    customAccel?: {x: number, y: number}
 }
 
-export default function Player({ onPlayerMove, worldWidth, worldHeight }: PlayerProps) {
+export default function Player({ worldWidth, worldHeight, setPositionX, setPositionY, friction, maxSpeed, customAccel }: PlayerProps) {
     const [currentTexture, setCurrentTexture] = useState(charDown);
-
-    const [positionX, setPositionX] = useState(-153);
-    const [positionY, setPositionY] = useState(1117);
 
     const [isMoving, setIsMoving] = useState(false);
 
     const acceleration = useRef<{x: number, y: number}>({ x: 0, y: 0 });
+    const velocity = useRef<{x: number, y: number}>({ x: 0, y: 0 });
 
     useEffect(() => {
-        onPlayerMove?.(positionX, positionY);
-    }, [onPlayerMove, positionX, positionY]);
+        if (customAccel) {
+            acceleration.current.x = customAccel.x;
+            acceleration.current.y = customAccel.y;
+
+            if (acceleration.current.x !== 0 && acceleration.current.y !== 0) {
+                acceleration.current.x /= Math.sqrt(2);
+                acceleration.current.y /= Math.sqrt(2);
+            }
+        }
+    }, [customAccel]);
 
     useKeyboardInput(keys => {
         const isPressingMoveKeys = keys.includes("w")||keys.includes("a")||keys.includes("s")||keys.includes("d");
 
-        if (isMoving && !isPressingMoveKeys) {
-            setIsMoving(false);
-        }
-
-        if (isPressingMoveKeys && !isMoving) {
-            setIsMoving(true);
-        }
+        acceleration.current.x = 0;
+        acceleration.current.y = 0;
 
         if (keys.includes("a")) {
-            acceleration.current.x = -4;
+            acceleration.current.x = -1;
         }
         if (keys.includes("d")) {
-            acceleration.current.x = 4;
+            acceleration.current.x = 1;
         }
         if (keys.includes("w")) {
-            acceleration.current.y = -4;
+            acceleration.current.y = -1;
         }
         if (keys.includes("s")) {
-            acceleration.current.y = 4;
+            acceleration.current.y = 1;
         }
 
-        if (!keys.includes("a") && !keys.includes("d")) {
-            acceleration.current.x = 0;
-        }
-
-        if (!keys.includes("w") && !keys.includes("s")) {
-            acceleration.current.y = 0;
+        if (acceleration.current.x !== 0 && acceleration.current.y !== 0) {
+            acceleration.current.x /= Math.sqrt(2);
+            acceleration.current.y /= Math.sqrt(2);
         }
     }, ["w", "a", "s", "d"]);
 
-    useAnimationFrame(() => {
-        if (acceleration.current.x !== 0) {
-            setPositionX(x => x + acceleration.current.x);
-
-            if (acceleration.current.x > 0) {
-                setCurrentTexture(charRight);
-            } else {
-                setCurrentTexture(charLeft);
-            }
+    useAnimationFrame((delta: number) => {
+        if (!isMoving && (acceleration.current.x !== 0 || acceleration.current.y !== 0)) {
+            setIsMoving(true);
+        } else if (isMoving && acceleration.current.x === 0 && acceleration.current.y === 0) {
+            setIsMoving(false);
         }
 
-        if (acceleration.current.y !== 0) {
-            setPositionY(y => y + acceleration.current.y);
+        const deltaSeconds = delta / 1000;
+        const maxSpeed2 = maxSpeed ?? 1500;
+        const friction2 = friction ?? 0.85;
 
-            if (acceleration.current.y > 0) {
-                setCurrentTexture(charDown);
+        velocity.current.x += acceleration.current.x * deltaSeconds * maxSpeed2;
+        velocity.current.y += acceleration.current.y * deltaSeconds * maxSpeed2;
+
+        // Apply friction
+        velocity.current.x *= Math.pow(friction2, deltaSeconds * 60);
+        velocity.current.y *= Math.pow(friction2, deltaSeconds * 60);
+
+        const speed = Math.sqrt(velocity.current.x ** 2 + velocity.current.y ** 2);
+        if (speed > maxSpeed2) {
+            const ratio = maxSpeed2 / speed;
+            velocity.current.x *= ratio;
+            velocity.current.y *= ratio;
+        }
+
+        if (velocity.current.x !== 0 || velocity.current.y !== 0) {
+            setPositionX(x => x + velocity.current.x * deltaSeconds);
+            setPositionY(y => y + velocity.current.y * deltaSeconds);
+
+            // Update texture based on direction
+            if (Math.abs(velocity.current.x) > Math.abs(velocity.current.y)) {
+                if (velocity.current.x > 0) {
+                    setCurrentTexture(charRight);
+                } else {
+                    setCurrentTexture(charLeft);
+                }
             } else {
-                setCurrentTexture(charUp);
+                if (velocity.current.y > 0) {
+                    setCurrentTexture(charDown);
+                } else {
+                    setCurrentTexture(charUp);
+                }
             }
         }
     });
@@ -97,8 +129,8 @@ export default function Player({ onPlayerMove, worldWidth, worldHeight }: Player
             }}
             sx={{
                 position: "absolute",
-                left: (worldWidth / 2),
-                top: (worldHeight / 2),
+                left: (worldWidth / 2) + 6,
+                top: (worldHeight / 2) + 6,
                 zIndex: 1
             }}
         />

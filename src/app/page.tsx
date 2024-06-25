@@ -5,13 +5,28 @@ import harmonyForeMap from "@/assets/maps/HarmonyIsle/foreground.png";
 import Player from "@/components/Player";
 import World from "@/components/World";
 import { useEffect, useRef, useState } from "react";
+import { Box, useMediaQuery } from "@mui/material";
+import common from "@/styles/common";
+import Joystick from "@/components/Joystick";
 
 export default function Home() {
   const worldRef = useRef<HTMLDivElement>();
+
   const [worldWidth, setWorldWidth] = useState(0);
   const [worldHeight, setWorldHeight] = useState(0);
-  const [worldPosX, setWorldPosX] = useState(153);
-  const [worldPosY, setWorldPosY] = useState(-1117);
+  const [worldPosX, setWorldPosX] = useState(0);
+  const [worldPosY, setWorldPosY] = useState(0);
+
+  const [playerPosX, setPlayerPosX] = useState(540);
+  const [playerPosY, setPlayerPosY] = useState(820);
+
+  const isMobilePlayer = useMediaQuery('only screen and (max-height: 600px)');
+  const [joystickDirection, setJoystickDirection] = useState({ x: 0, y: 0});
+
+  useEffect(() => {
+    setWorldPosX((worldWidth / 2) - playerPosX);
+    setWorldPosY((worldHeight / 2) - playerPosY);
+  }, [playerPosX, playerPosY, worldHeight, worldWidth]);
 
   useEffect(() => {
     const onScreenUpdate = () => {
@@ -32,14 +47,15 @@ export default function Home() {
     }
   }, []);
 
-  const onPlayerMove = (x: number, y: number) => {
-    setWorldPosX(-x)
-    setWorldPosY(-y)
-  }
-
   return (
     <World background={harmonyMap} backgroundPosition={{ x: worldPosX, y: worldPosY }} foreground={harmonyForeMap} worldRef={worldRef}>
-      <Player onPlayerMove={onPlayerMove} worldWidth={worldWidth} worldHeight={worldHeight} />
+      <Player setPositionX={setPlayerPosX} setPositionY={setPlayerPosY} worldWidth={worldWidth} worldHeight={worldHeight} customAccel={isMobilePlayer ? joystickDirection : undefined}/>
+      <Box sx={common.uiContainer}>
+        {
+          isMobilePlayer &&
+          <Joystick radius={70} sx={{ position: "absolute", bottom: 10, left: 10 }} onAxisChanged={dir => setJoystickDirection(dir)} />
+        }
+      </Box>
     </World>
   );
 }
