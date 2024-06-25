@@ -53,7 +53,7 @@ export default function Home() {
       <Box sx={common.uiContainer}>
         {
           isMobilePlayer &&
-          <Joystick radius={70} sx={{ position: "absolute", bottom: 10, left: 10 }} onAxisChanged={dir => setJoystickDirection(dir)} />
+          <Joystick radius={60} sx={{ position: "absolute", bottom: 30, left: 30 }} onAxisChange={dir => setJoystickDirection(dir)} />
         }
       </Box>
     </World>

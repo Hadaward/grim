@@ -7,10 +7,10 @@ export type JoystickProps = {
     radius: number
     sx?: SxProps<Theme>
     knobSx?: SxProps<Theme>
-    onAxisChanged?: (direction: Readonly<{x: number, y: number}>) => void
+    onAxisChange?: (direction: Readonly<{x: number, y: number}>) => void
 }
 
-export default function Joystick({ radius, sx, knobSx, onAxisChanged }: JoystickProps) {
+export default function Joystick({ radius, sx, knobSx, onAxisChange }: JoystickProps) {
     const [position, setPosition] = useState({ x: radius / 2, y: radius / 2 });
 
     const handleTouchMove = (e: any) => {
@@ -34,17 +34,20 @@ export default function Joystick({ radius, sx, knobSx, onAxisChanged }: Joystick
             });
         }
 
+        const pDx = Math.floor(dx / radius);
+        const pDy = Math.floor(dy / radius);
+
         const direction = {
-            x: dx > 0 ? 1 : dx < 0 ? -1 : 0,
-            y: dy > 0 ? 1 : dy < 0 ? -1 : 0,
+            x: pDx > 0 ? 1 : pDx < 0 ? -1 : 0,
+            y: pDy > 0 ? 1 : pDy < 0 ? -1 : 0,
         };
 
-        onAxisChanged?.(Object.freeze(direction));
+        onAxisChange?.(Object.freeze(direction));
     };
 
     const handleTouchEnd = () => {
         setPosition({ x: radius / 2, y: radius / 2 });
-        onAxisChanged?.(Object.freeze({ x: 0, y: 0 }));
+        onAxisChange?.(Object.freeze({ x: 0, y: 0 }));
     };
 
     return (
