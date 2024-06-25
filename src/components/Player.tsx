@@ -22,9 +22,10 @@ export type PlayerProps = {
     setPositionX: Dispatch<SetStateAction<number>>,
     setPositionY: Dispatch<SetStateAction<number>>,
     customAccel?: {x: number, y: number}
+    isMobile: boolean
 }
 
-export default function Player({ worldWidth, worldHeight, setPositionX, setPositionY, friction, maxSpeed, customAccel }: PlayerProps) {
+export default function Player({ isMobile, worldWidth, worldHeight, setPositionX, setPositionY, friction, maxSpeed, customAccel }: PlayerProps) {
     const [currentTexture, setCurrentTexture] = useState(charDown);
 
     const [isMoving, setIsMoving] = useState(false);
@@ -45,6 +46,8 @@ export default function Player({ worldWidth, worldHeight, setPositionX, setPosit
     }, [customAccel]);
 
     useKeyboardInput(keys => {
+        if (isMobile)
+            return;
         const isPressingMoveKeys = keys.includes("w")||keys.includes("a")||keys.includes("s")||keys.includes("d");
 
         acceleration.current.x = 0;
