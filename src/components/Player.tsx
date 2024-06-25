@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import SpriteSheet from "./SpriteSheet";
-import common from "@/styles/common";
 import { useKeyboardInput } from "./util/hooks/keyboardInput";
 import { useAnimationFrame } from "./util/hooks/requestAnimationFrame";
 
@@ -11,9 +10,11 @@ import charRight from "@/assets/char/right.png";
 
 export type PlayerProps = {
     onPlayerMove?: (x: number, y: number) => void,
+    worldWidth: number,
+    worldHeight: number
 }
 
-export default function Player({ onPlayerMove }: PlayerProps) {
+export default function Player({ onPlayerMove, worldWidth, worldHeight }: PlayerProps) {
     const [currentTexture, setCurrentTexture] = useState(charDown);
 
     const [positionX, setPositionX] = useState(-153);
@@ -96,8 +97,8 @@ export default function Player({ onPlayerMove }: PlayerProps) {
             }}
             sx={{
                 position: "absolute",
-                left: (common.world.width / 2),
-                top: (common.world.height / 2),
+                left: (worldWidth / 2),
+                top: (worldHeight / 2),
                 zIndex: 1
             }}
         />

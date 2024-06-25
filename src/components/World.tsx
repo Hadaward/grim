@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { StaticImageData } from "next/image";
 import { mergeStyle } from "@/components/util/style";
 import common from "@/styles/common";
+import { MutableRefObject } from "react";
 
 export type WorldProps = {
     background: StaticImageData,
@@ -11,11 +12,12 @@ export type WorldProps = {
         x: number,
         y: number
     }
+    worldRef?: MutableRefObject<HTMLDivElement | undefined>
 };
 
-export default function World({ background, foreground, children, backgroundPosition }: WorldProps) {
+export default function World({ background, foreground, children, backgroundPosition, worldRef }: WorldProps) {
     return (
-        <Box sx={common.world}>
+        <Box sx={common.world} ref={worldRef}>
             <Box
             sx={{ top: 0, left: 0, zIndex: 0, position: "absolute", width: common.world.width, height: common.world.height, background: "black", backgroundImage: `url(${ background.src })`, backgroundPosition: `${backgroundPosition?.x ?? 0}px ${backgroundPosition?.y ?? 0}px` }}
             />
