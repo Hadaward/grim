@@ -1,30 +1,48 @@
 import { Box } from "@mui/material";
 import { StaticImageData } from "next/image";
 import { mergeStyle } from "@/components/util/style";
-import common from "@/styles/common";
-import { MutableRefObject } from "react";
+import globalStyle from "@/styles/global";
+import { Dispatch, MutableRefObject, SetStateAction } from "react";
 
 export type WorldProps = {
     background: StaticImageData,
     foreground?: StaticImageData,
     children?: React.ReactNode,
-    backgroundPosition?: {
-        x: number,
-        y: number
-    }
+    worldPosition:{ x: number, y: number }
     worldRef?: MutableRefObject<HTMLDivElement | undefined>
 };
 
-export default function World({ background, foreground, children, backgroundPosition, worldRef }: WorldProps) {
+export default function World({ background, foreground, children, worldPosition, worldRef }: WorldProps) {
     return (
-        <Box sx={common.world} ref={worldRef}>
+        <Box sx={globalStyle.world} ref={worldRef}>
             <Box
-            sx={{ top: 0, left: 0, zIndex: 0, position: "absolute", width: common.world.width, height: common.world.height, background: "black", backgroundRepeat: "no-repeat", backgroundImage: `url(${ background.src })`, backgroundPosition: `${backgroundPosition?.x ?? 0}px ${backgroundPosition?.y ?? 0}px` }}
+            sx={mergeStyle(
+                globalStyle.worldBackground,
+                {
+                    width: globalStyle.world.width,
+                    height: globalStyle.world.height,
+                    backgroundImage: `url(${ background.src })`,
+                    backgroundPosition: `${worldPosition.x}px ${worldPosition.y}px`,
+                    backgroundRepeat: "no-repeat",
+                }
+            )}
             />
             { children }
             { foreground && (
                 <Box
-                sx={{ top: 0, left: -10, zIndex: 2, position: "absolute", width: common.world.width, height: common.world.height, background: "transparent", backgroundRepeat: "no-repeat", backgroundImage: `url(${ foreground.src })`, backgroundPosition: `${backgroundPosition?.x ?? 0}px ${backgroundPosition?.y ?? 0}px`, opacity: 0.55 }}
+                    sx={mergeStyle(
+                        globalStyle.worldBackground,
+                        {
+                            left: -10,
+                            zIndex: 2,
+                            width: globalStyle.world.width,
+                            height: globalStyle.world.height,
+                            backgroundImage: `url(${ foreground.src })`,
+                            backgroundPosition: `${worldPosition.x}px ${worldPosition.y}px`,
+                            backgroundRepeat: "no-repeat",
+                            opacity: 0.55
+                        }
+                    )}
                 />
             )}
         </Box>

@@ -17,40 +17,38 @@ export type AnimationSheetProps = {
 }
 
 export type SpriteSheetProps = {
-    cellWidth: number
-    cellHeight: number
-    /**
-     * @default 0
-     */
-    cellX?: number
-    /**
-     * @default 0
-     */
-    cellY?: number
+    frameSize: { width: number, height: number }
+    initialFrame?: { x: number, y: number }
     image: StaticImageData
     animation?: AnimationSheetProps
     sx?: SxProps<Theme>
 };
 
-export default function SpriteSheet({ cellWidth, cellHeight, cellX, cellY, image, animation, sx }: SpriteSheetProps) {
-    const [currentCellX, setCurrentCellX] = useState(0);
-    const [currentCellY, setCurrentCellY] = useState(0);
-    const [currentSpriteX, setCurrentSpriteX] = useState(cellWidth * currentCellX);
-    const [currentSpriteY, setCurrentSpriteY] = useState(cellHeight * currentCellY);
+export default function SpriteSheet({ initialFrame, frameSize, image, animation, sx }: SpriteSheetProps) {
+    const [currentFrame, setCurrentFrame] = useState({
+        x: 0,
+        y: 0
+    });
+
+    const [currentSpritePosition, setCurrentSpritePosition] = useState({
+        x: frameSize.width * currentFrame.x,
+        y: frameSize.height * currentFrame.y
+    });
 
     const accumulatedTimeRef = useRef<number>(0);
 
     useEffect(() => {
-        setCurrentSpriteX(cellWidth * currentCellX);
-        setCurrentSpriteY(cellHeight * currentCellY);
-    }, [cellHeight, cellWidth, currentCellX, currentCellY]);
+        setCurrentSpritePosition({
+            x: frameSize.width * currentFrame.x,
+            y: frameSize.height * currentFrame.y
+        });
+    }, [currentFrame, frameSize]);
 
     useEffect(() => {
         if (animation && !animation.enabled && animation.resetWhenDisable) {
-            setCurrentCellX(cellX ?? 0);
-            setCurrentCellY(cellY ?? 0);
+            setCurrentFrame({ x: initialFrame?.x ?? 0, y: initialFrame?.y ?? 0 });
         }
-    }, [animation, animation?.enabled, animation?.resetWhenDisable, cellX, cellY]);
+    }, [animation, initialFrame]);
     
     useAnimationFrame(delta => {
         if (!animation?.enabled)
@@ -63,30 +61,35 @@ export default function SpriteSheet({ cellWidth, cellHeight, cellX, cellY, image
         if (accumulatedTimeRef.current >= delay) {
             accumulatedTimeRef.current %= delay;
 
-            const maxCellX = Math.floor(image.width / cellWidth);
-            const maxCellY = Math.floor(image.height / cellHeight);
+            const maxFrame = {
+                x: Math.floor(image.width / frameSize.width),
+                y: Math.floor(image.height / frameSize.height)
+            };
 
-            let nextCellX = currentCellX + 1;
-            let nextCellY = currentCellY;
+            const nextFrame = {
+                x: currentFrame.x + 1,
+                y: currentFrame.y
+            };
 
-            if (nextCellX >= maxCellX) {
-                nextCellX = 0;
-                nextCellY++;
+            if (nextFrame.x >= maxFrame.x) {
+                nextFrame.x = 0;
+                nextFrame.y++;
 
-                if (nextCellY >= maxCellY) {
+                if (nextFrame.y >= maxFrame.y) {
                     if (animation.loop) {
-                        nextCellX = 0;
-                        nextCellY = 0;
+                        nextFrame.x = 0;
+                        nextFrame.y = 0;
                     } else {
                         return;
                     }
                 }
             }
 
-            setCurrentCellX(nextCellX);
-            setCurrentCellY(nextCellY);
-            setCurrentSpriteX(cellWidth * nextCellX);
-            setCurrentSpriteY(cellHeight * nextCellY);
+            setCurrentFrame({ x: nextFrame.x, y: nextFrame.y });
+            setCurrentSpritePosition({
+                x: frameSize.width * nextFrame.x,
+                y: frameSize.height * nextFrame.y
+            });
         }
     });
 
@@ -97,9 +100,9 @@ export default function SpriteSheet({ cellWidth, cellHeight, cellX, cellY, image
                 display: "inline-block",
                 background: `url(${image.src})`,
                 backgroundRepeat: "no-repeat",
-                width: cellWidth,
-                height: cellHeight,
-                backgroundPosition: `-${currentSpriteX}px -${currentSpriteY}px`
+                width: frameSize.width,
+                height: frameSize.height,
+                backgroundPosition: `-${currentSpritePosition.x}px -${currentSpritePosition.y}px`
             }}
         />
     )

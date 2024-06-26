@@ -6,8 +6,16 @@ export default makeStyle({
     world: {
         width: "100%",
         height: "100%",
-        backgroundRepeat: "no-repeat",
+        background: "#67E6D2",
         position: "relative",
+    },
+
+    worldBackground: {
+        top: 0,
+        left: 0,
+        zIndex: 0,
+        position: "absolute",
+        background: "transparent",
     },
 
     uiContainer: {
@@ -21,5 +29,10 @@ export default makeStyle({
         border: "none",
         outline: "none",
         zIndex: 3
+    },
+
+    playerTexture: {
+        position: "absolute",
+        zIndex: 1
     }
 });

@@ -9,6 +9,6 @@ export function makeStyle<T extends Record<string, SxProps<Theme>>>(style: T): T
     return style;
 }
 
-export function mergeStyle<F extends SxProps<Theme>, T extends SxProps<Theme>[]>(first: F, ...styles: T): F & Merge<T> {
-    return Object.assign(first as object, ...styles) as F & Merge<T>;
+export function mergeStyle<T extends SxProps<Theme>[]>(...args: SxProps<Theme>[] | [...T]): Merge<T> & SxProps<Theme> {
+    return Object.assign({}, ...args);
 }

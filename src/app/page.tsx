@@ -6,32 +6,29 @@ import Player from "@/components/Player";
 import World from "@/components/World";
 import { useEffect, useRef, useState } from "react";
 import { Box, Icon, Typography, useMediaQuery } from "@mui/material";
-import common from "@/styles/common";
+import globalStyle from "@/styles/global";
 import Joystick from "@/components/Joystick";
 
 import ScreenRotationIcon from '@mui/icons-material/ScreenRotation';
 
 export default function Home() {
+  const isMobilePortrait = useMediaQuery('only screen and (max-width: 480px)');
+  const isMobileLandscape = useMediaQuery('only screen and (max-height: 600px)');
+
   const worldRef = useRef<HTMLDivElement>();
 
-  const [worldWidth, setWorldWidth] = useState(0);
-  const [worldHeight, setWorldHeight] = useState(0);
-  const [worldPosX, setWorldPosX] = useState(0);
-  const [worldPosY, setWorldPosY] = useState(0);
-
-  const [playerPosX, setPlayerPosX] = useState(540);
-  const [playerPosY, setPlayerPosY] = useState(820);
-
-  const isMobilePlayerPortrait = useMediaQuery('only screen and (max-width: 480px)');
-  const isMobilePlayer = useMediaQuery('only screen and (max-height: 600px)');
   const [joystickDirection, setJoystickDirection] = useState({ x: 0, y: 0});
-
-  const [firstMobileAction, setFirstMobileAction] = useState(false);
+  const [playerPosition, setPlayerPosition] = useState({ x: 540, y: 820 });
+  const [worldPosition, setWorldPosition] = useState({ x: 0, y: 0 });
+  const [worldSize, setWorldSize] = useState({ width: 0, height: 0 });
+  
+  const [canSetMobileOnFullscreen, setCanSetMobileOnFullscreen] = useState(false);
 
   useEffect(() => {
-    setWorldPosX((worldWidth / 2) - playerPosX);
-    setWorldPosY((worldHeight / 2) - playerPosY);
-  }, [playerPosX, playerPosY, worldHeight, worldWidth]);
+    if (worldSize.width !== 0 && worldSize.height !== 0) {
+      setWorldPosition({ x: (worldSize.width / 2) - playerPosition.x, y: (worldSize.height / 2) - playerPosition.y });
+    }
+  }, [worldSize, playerPosition]);
 
   useEffect(() => {
     const onScreenUpdate = () => {
@@ -41,25 +38,32 @@ export default function Home() {
 
       const computed = getComputedStyle(worldRef.current);
 
-      setWorldWidth(Number(computed.width.match(/[0-9\.]+/)?.[0]??0));
-      setWorldHeight(Number(computed.height.match(/[0-9\.]+/)?.[0]??0));
+      setWorldSize({
+        width: Number(
+          computed.width.match(/[0-9\.]+/)?.[0] ?? 0
+        ),
+        height: Number(
+          computed.height.match(/[0-9\.]+/)?.[0] ?? 0
+        )
+      });
     }
     
     onScreenUpdate();
     addEventListener("resize", onScreenUpdate);
+
     return () => {
       removeEventListener("resize", onScreenUpdate);
     }
   }, []);
 
   useEffect(() => {
-    if (isMobilePlayer && worldRef.current && firstMobileAction && document.fullscreenElement !== worldRef.current) {
-        worldRef.current.requestFullscreen();
-        setFirstMobileAction(false);
+    if (isMobileLandscape && worldRef.current && document.fullscreenElement !== worldRef.current && canSetMobileOnFullscreen) {
+      worldRef.current.requestFullscreen();
+      setCanSetMobileOnFullscreen(false);
     }
-  }, [firstMobileAction, isMobilePlayer]);
+  }, [canSetMobileOnFullscreen, isMobileLandscape]);
 
-  if (isMobilePlayerPortrait) {
+  if (isMobilePortrait) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", placeItems: "center", textAlign: "center", width: "100%", height: "100%", gap: 2 }}>
         <Typography component="h3" fontWeight={700}>
@@ -71,11 +75,28 @@ export default function Home() {
   }
 
   return (
-    <World background={harmonyMap} backgroundPosition={{ x: worldPosX, y: worldPosY }} foreground={harmonyForeMap} worldRef={worldRef}>
-      <Player isMobile={isMobilePlayer} setPositionX={setPlayerPosX} setPositionY={setPlayerPosY} worldWidth={worldWidth} worldHeight={worldHeight} customAccel={isMobilePlayer ? joystickDirection : undefined}/>
-      <Box sx={common.uiContainer} onClick={() => { if (!firstMobileAction) setFirstMobileAction(true); }}>
+    <World
+      background={harmonyMap}
+      foreground={harmonyForeMap}
+      worldPosition={worldPosition}
+      worldRef={worldRef}
+    >
+      <Player
+        isMobile={isMobileLandscape}
+        setPlayerPosition={setPlayerPosition}
+        worldSize={worldSize}
+        customAccel={isMobileLandscape ? joystickDirection : undefined}
+      />
+      <Box
+        sx={globalStyle.uiContainer}
+        onClick={() => {
+          if (isMobileLandscape && !canSetMobileOnFullscreen) {
+            setCanSetMobileOnFullscreen(true);
+          }
+        }}
+      >
         {
-          isMobilePlayer &&
+          isMobileLandscape &&
           <Joystick radius={60} sx={{ position: "absolute", bottom: 50, left: 50 }} onAxisChange={dir => setJoystickDirection(dir)} />
         }
       </Box>
