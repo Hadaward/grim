@@ -5,7 +5,7 @@ import harmonyForeMap from "@/assets/maps/HarmonyIsle/foreground.png";
 import Player from "@/components/Player";
 import World from "@/components/World";
 import { useEffect, useRef, useState } from "react";
-import { Box, Icon, Typography, useMediaQuery } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import globalStyle from "@/styles/global";
 import Joystick from "@/components/Joystick";
 
