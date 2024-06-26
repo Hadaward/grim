@@ -1,7 +1,7 @@
 "use client";
 
-import harmonyMap from "@/assets/maps/HarmonyIsle/terrain.png";
-import harmonyForeMap from "@/assets/maps/HarmonyIsle/foreground.png";
+import harmonyMap from "@/assets/maps/TestIsle/terrain.png";
+import harmonyForeMap from "@/assets/maps/TestIsle/foreground.png";
 import Player from "@/components/Player";
 import World from "@/components/World";
 import { useEffect, useRef, useState } from "react";
